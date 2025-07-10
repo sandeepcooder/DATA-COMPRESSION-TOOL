@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to perform RLE compression
+void compressRLE(FILE* in, FILE* out) {
+    char currentChar, nextChar;
+    int count;
+
+    currentChar = fgetc(in);
+    while (currentChar != EOF) {
+        count = 1;
+        while ((nextChar = fgetc(in)) == currentChar) {
+            count++;
+        }
+
+        fputc(currentChar, out);
+        fprintf(out, "%d", count);
+
+        currentChar = nextChar;
+    }
+}
+
+// Function to perform RLE decompression
+void decompressRLE(FILE* in, FILE* out) {
+    char ch;
+    int count;
+
+    while ((ch = fgetc(in)) != EOF) {
+        fscanf(in, "%d", &count);
+        for (int i = 0; i < count; i++) {
+            fputc(ch, out);
+        }
+    }
+}
+
+// Main function
+int main() {
+    int choice;
+    FILE *inputFile, *outputFile;
+
+    printf("Run-Length Encoding\n");
+    printf("1. Compress\n2. Decompress\nEnter choice: ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        inputFile = fopen("input.txt", "r");
+        outputFile = fopen("compressed.txt", "w");
+        if (!inputFile || !outputFile) {
+            printf("Error opening files.\n");
+            return 1;
+        }
+
+        compressRLE(inputFile, outputFile);
+        printf("✅ Compression done. Output: compressed.txt\n");
+    }
+    else if (choice == 2) {
+        inputFile = fopen("compressed.txt", "r");
+        outputFile = fopen("decompressed.txt", "w");
+        if (!inputFile || !outputFile) {
+            printf("Error opening files.\n");
+            return 1;
+        }
+
+        decompressRLE(inputFile, outputFile);
+        printf("✅ Decompression done. Output: decompressed.txt\n");
+    }
+    else {
+        printf("Invalid choice.\n");
+    }
+
+    fclose(inputFile);
+    fclose(outputFile);
+    return 0;
+}
