@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+// Function to compress using RLE
+void compressFile(FILE *in, FILE *out) {
+    char current, next;
+    int count;
+
+    current = fgetc(in);
+    while (current != EOF) {
+        count = 1;
+        while ((next = fgetc(in)) == current) {
+            count++;
+        }
+
+        fputc(current, out);        // character
+        fprintf(out, "%d", count);  // count
+
+        current = next; // move to next different char
+    }
+}
+
+// Function to decompress using RLE
+void decompressFile(FILE *in, FILE *out) {
+    char ch;
+    int count;
+
+    while ((ch = fgetc(in)) != EOF) {
+        if (isalpha(ch) || ispunct(ch) || ch == ' ') {
+            fscanf(in, "%d", &count);
+            for (int i = 0; i < count; i++) {
+                fputc(ch, out);
+            }
+        }
+    }
+}
+
+// Main driver function
+int main() {
+    int choice;
+    FILE *inFile, *outFile;
+
+    printf("\n===== RLE Text File Tool =====\n");
+    printf("1. Compress (input.txt → compressed.txt)\n");
+    printf("2. Decompress (compressed.txt → decompressed.txt)\n");
+    printf("Choose option: ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        inFile = fopen("input.txt", "r");
+        outFile = fopen("compressed.txt", "w");
+
+        if (inFile == NULL || outFile == NULL) {
+            printf("❌ Error opening files.\n");
+            return 1;
+        }
+
+        compressFile(inFile, outFile);
+        printf("✅ Compression complete → compressed.txt\n");
+    } else if (choice == 2) {
+        inFile = fopen("compressed.txt", "r");
+        outFile = fopen("decompressed.txt", "w");
+
+        if (inFile == NULL || outFile == NULL) {
+            printf("❌ Error opening files.\n");
+            return 1;
+        }
+
+        decompressFile(inFile, outFile);
+        printf("✅ Decompression complete → decompressed.txt\n");
+    } else {
+        printf("⚠️ Invalid option.\n");
+        return 1;
+    }
+
+    fclose(inFile);
+    fclose(outFile);
+    return 0;
+}
